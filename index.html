@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>LiteRPG</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- FONT
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- JS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- <script src="http://cdn.staticfile.org/jquery/1.11.1/jquery.min.js"></script> -->
+    <script src="javascript/vue.min.js"></script>
+    <script src="javascript/calc.js"></script>
+    <script src="javascript/ui.js"></script>
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+
+<!-- Primary Page Layout
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+<!-- item template -->
+<script type="text/x-template" id="node-template">
+    <g v-if="!is_parent && model.type == 'nothing'">
+        <!-- nothing -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="nothing"/>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'heal'">
+        <!-- heal -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="heal"/>
+        <text v-attr="x: model.x, y: model.y" transform="translate(-5.5,3)" class="svgtext">+{{model.hp}}</text>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'harm'">
+        <!-- harm -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="harm"/>
+        <text v-attr="x: model.x, y: model.y" transform="translate(-5.5,3)" class="svgtext">-{{model.hp}}</text>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'attr_point'">
+        <!-- attr_point -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="attr_point"/>
+        <text v-attr="x: model.x, y: model.y" transform="translate(-5.5,3)" class="svgtext">+{{model.value}}</text>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'lazy_point_inc'">
+        <!-- lazy_point -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="lazy_point"/>
+        <text v-attr="x: model.x, y: model.y" transform="translate(-5.5,3)" class="svgtext">+{{model.value}}</text>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'lazy_point_dec'">
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="lazy_point"/>
+        <text v-attr="x: model.x, y: model.y" transform="translate(-5.5,3)" class="svgtext">-{{model.value}}</text>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'dead_road'">
+        <!-- dead_road -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="dead_road"/>
+    </g>
+
+    <g v-if="!is_parent && model.type == 'monster'">
+        <!-- monster -->
+        <circle v-attr="cx: model.x, cy: model.y" r="10" class="monster"/>
+    </g>
+
+    <node v-if="is_parent" v-repeat="model: model.children"></node>
+</script>
+
+<div class="container">
+    <div id="rpg">
+        <div>
+            <h2 style="float:left;margin-bottom:0px;margin-right:10px;">简单的RPG</h2>
+            <div>
+                <div>天数 {{ game.day }}</div>
+                <div>今日天气 {{ weather.today[0] }}</div>
+            </div>
+        </div>
+        <div class="charinfo" style="clearfix: both;">
+            生命值: {{charinfo.hp}} 攻击力: {{charinfo.atk}} 速度: {{charinfo.spd}} 属性点: {{charinfo.attr_point}} 疲劳值: {{charinfo.lazy_point}}
+        </div>
+        <svg id="stage" width="800" height="300" v-attr="viewBox: camera_box"
+            v-on="selectstart:prevent, mousemove: dragMove, mouseup:dragEnd, mousedown:dragStart">
+            <node class="node" model={{path}}></node>
+            <g id="arrow" v-attr="transform: game.arrow_transform" fill="#fff" stroke="#000">
+                <path d="M0,0 V14Z M-7,10 L0,15 L7,10"></path>
+            </g>
+        </svg>
+        <div>
+            <ul id="logbox">
+                <li v-transition="expand" v-repeat="game.log.items" style="color: {{color}}">{{txt}}</li>
+            </ul>
+        <div>
+            <button class="button button-primary" v-on="click : step">前行</button>
+            <button class="button button-primary" v-on="click : switch_road">换路</button>
+            <button class="button button-primary" v-on="click : seeyou">回家</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        init();
+    })();
+</script>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

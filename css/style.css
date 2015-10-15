@@ -1,0 +1,123 @@
+
+hr {
+    margin-bottom: 0;
+}
+
+.container {
+    margin-top: 5%;
+}
+
+.button.button-danger {
+    color: #FFF;
+    background-color: #F05533;
+    border-color: #F05533;
+}
+
+.button-danger:hover,
+.button-danger:focus {
+  color: #FFF;
+  background-color: #DB401E;
+  border-color: #DB401E;
+}
+
+
+.button.button-success {
+    color: #FFF;
+    background-color: #33CC55;
+    border-color: #33F055;
+}
+
+.button-success:hover,
+.button-success:focus {
+  color: #FFF;
+  background-color: #1EB740;
+  border-color: #1EB740;
+}
+
+.button-success:disabled {
+    background-color: #999;
+    border-color: #999;
+}
+
+.charinfo {
+    /*border: 1px solid;
+    width: 162px;
+    height: 100px;*/
+    padding: 5px;
+}
+
+.charinfo > .hp {
+    position: relative;
+    top: 10px;
+    left: 100px;
+}
+
+.charinfo > .hp > .title {
+
+}
+
+.expand-transition {
+    transition: all .8s ease;
+}
+
+.expand-enter, .expand-leave {
+    opacity: 0;
+}
+
+#stage {
+    border: 1px solid;
+    border-radius: 3px;
+}
+
+.nothing {
+    fill:rgb(255,255,255);
+    stroke: black;
+    stroke-width: 2;
+}
+
+.heal {
+    fill:rgb(255,255,255);
+    stroke: rgb(50, 170, 50);
+    stroke-width: 2;
+}
+
+.harm {
+    fill:rgb(255,255,255);
+    stroke: rgb(170, 50, 50);
+    stroke-width: 2;
+}
+
+.attr_point {
+    fill:rgb(255,255,255);
+    stroke: rgb(50, 50, 170);
+    stroke-width: 2;
+}
+
+.lazy_point {
+    fill:rgb(255,255,255);
+    stroke: rgb(170, 170, 50);
+    stroke-width: 2;
+}
+
+.dead_road {
+    fill:rgb(0,0,0);
+    stroke: black;
+    stroke-width: 2;
+}
+
+.monster {
+    fill:rgb(170,50,50);
+    stroke: black;
+    stroke-width: 2;
+}
+
+.svgtext {
+    fill: black;
+    font-size: 0.7em;
+}
+
+#logbox {
+    min-height: 100px;
+    max-height: 100px;
+    overflow-y: scroll;
+}
