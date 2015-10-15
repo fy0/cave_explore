@@ -418,7 +418,7 @@ root.init = ->
             lazy_up: ->
                 if game.pigfoot.get('attr_point') >= 1
                     game.pigfoot.inc('attr_point', -1)
-                    game.pigfoot.inc('lazy_point', 1)
+                    game.pigfoot.inc('lazy_point_max', 1)
 
             recure: ->
                 if game.pigfoot.get('attr_point') >= 2
