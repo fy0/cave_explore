@@ -379,13 +379,20 @@ root.init = ->
             prevent: (e) ->
                 e.preventDefault()
             dragStart: (e) ->
-                @drag = [e.x, e.y]
+                if e.touches
+                    @drag = [e.touches.clientX, e.touches.clientY]
+                else
+                    @drag = [e.x, e.y]
                 @startx = game.camera.minx
                 @starty = game.camera.miny
             dragMove: (e) ->
                 if @drag
-                    ox = e.x - @drag[0]
-                    oy = e.y - @drag[1]
+                    if e.touches
+                        ox = e.touches.clientX - @drag[0]
+                        oy = e.touches.clientY - @drag[1]
+                    else
+                        ox = e.x - @drag[0]
+                        oy = e.y - @drag[1]
                     game.camera.minx = @startx - ox
                     game.camera.miny = @starty - oy
             dragEnd: (e) ->

@@ -600,15 +600,24 @@
           return e.preventDefault();
         },
         dragStart: function(e) {
-          this.drag = [e.x, e.y];
+          if (e.touches) {
+            this.drag = [e.touches.clientX, e.touches.clientY];
+          } else {
+            this.drag = [e.x, e.y];
+          }
           this.startx = game.camera.minx;
           return this.starty = game.camera.miny;
         },
         dragMove: function(e) {
           var ox, oy;
           if (this.drag) {
-            ox = e.x - this.drag[0];
-            oy = e.y - this.drag[1];
+            if (e.touches) {
+              ox = e.touches.clientX - this.drag[0];
+              oy = e.touches.clientY - this.drag[1];
+            } else {
+              ox = e.x - this.drag[0];
+              oy = e.y - this.drag[1];
+            }
             game.camera.minx = this.startx - ox;
             return game.camera.miny = this.starty - oy;
           }
