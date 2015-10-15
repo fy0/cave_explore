@@ -91,7 +91,7 @@
 <div class="container">
     <div id="rpg">
         <div>
-            <h2 style="float:left;margin-bottom:0px;margin-right:10px;">简单的RPG v0.7</h2>
+            <h2 style="float:left;margin-bottom:0px;margin-right:10px;">简单的RPG v0.</h2>
             <div>
                 <div>天数 {{ game.day }}</div>
                 <div>今日天气 {{ weather.today.txt }}</div>
@@ -102,7 +102,7 @@
             攻击力: {{charinfo.get('atk')}}({{atk_txt}})
             速度: {{charinfo.get('spd')}}({{spd_txt}})
             属性点: {{charinfo.attr_point.toFixed(1)}}
-            疲劳值: {{charinfo.get('lazy_point')}}({{lazy_point_txt}})
+            疲劳值: {{charinfo.get('lazy_point')}}/{{charinfo.get('lazy_point_max')}}({{lazy_point_txt}})
         </div>
         <svg id="stage" width="960" height="240" v-attr="viewBox: camera_box"
             v-on="selectstart:prevent, mousemove: dragMove, mouseup:dragEnd, mousedown:dragStart">
@@ -136,6 +136,7 @@
         init();
     })();
 </script>
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1254382737'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1254382737%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
