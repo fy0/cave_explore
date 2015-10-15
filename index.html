@@ -105,7 +105,7 @@
             疲劳值: {{charinfo.get('lazy_point')}}/{{charinfo.get('lazy_point_max')}}({{lazy_point_txt}})
         </div>
         <svg id="stage" width="960" height="240" v-attr="viewBox: camera_box"
-            v-on="selectstart:prevent, mousemove: dragMove, mouseup:dragEnd, mousedown:dragStart">
+            v-on="selectstart:prevent, mousemove: dragMove, mouseup:dragEnd, mousedown:dragStart, touchstart: dragStart, touchmove: dragMove, touchend:dragEnd" >
             <node class="node" model={{path}}></node>
             <g id="arrow" v-attr="transform: game.arrow_transform" fill="#fff" stroke="#000">
                 <path d="M0,0 V14Z M-7,10 L0,15 L7,10"></path>
