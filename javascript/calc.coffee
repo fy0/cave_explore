@@ -390,6 +390,7 @@ root.init = ->
                     if e.touches
                         ox = e.touches[0].clientX - @drag[0]
                         oy = e.touches[0].clientY - @drag[1]
+                        e.preventDefault()
                     else
                         ox = e.x - @drag[0]
                         oy = e.y - @drag[1]

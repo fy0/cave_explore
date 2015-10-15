@@ -614,6 +614,7 @@
             if (e.touches) {
               ox = e.touches[0].clientX - this.drag[0];
               oy = e.touches[0].clientY - this.drag[1];
+              e.preventDefault();
             } else {
               ox = e.x - this.drag[0];
               oy = e.y - this.drag[1];
