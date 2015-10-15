@@ -4,7 +4,7 @@ hr {
 }
 
 .container {
-    margin-top: 5%;
+    margin-top: 2%;
 }
 
 .button.button-danger {
@@ -117,7 +117,7 @@ hr {
 }
 
 #logbox {
-    min-height: 130px;
-    max-height: 130px;
+    min-height: 150px;
+    max-height: 150px;
     overflow-y: scroll;
 }
