@@ -331,14 +331,19 @@
       switch (rand(3)) {
         case 1:
           this.log.print('你继续前行，黑暗中传来窸窸窣窣的声音。你握紧了武器，屏住呼吸。一条蛇！');
-          return this.log.print("你手疾眼快，斩杀了这条蛇，但还是被咬了。受到了" + num + "点伤害。");
+          this.log.print("你手疾眼快，斩杀了这条蛇，但还是被咬了。受到了" + num + "点伤害。");
+          break;
         case 2:
           this.log.print('你向前走着，忽然听到了什么声音。你努力分辨着，好像是……机括？弓弦？');
-          return this.log.print("陷阱！你受到了" + num + "点伤害。");
+          this.log.print("陷阱！你受到了" + num + "点伤害。");
+          break;
         case 3:
           this.log.print('你的火把灭了，正当你重新点火的时候，一道阴影悄无声息的穿透了你的身体。');
           this.log.print('你感到寒冷，痛苦在身体中蔓延。');
-          return this.log.print("你受到负能量侵袭。遭受了" + num + "点伤害");
+          this.log.print("你受到负能量侵袭。遭受了" + num + "点伤害");
+      }
+      if (this.pigfoot.get('hp') <= 0) {
+        return this.dead();
       }
     };
 

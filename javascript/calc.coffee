@@ -204,6 +204,8 @@ class Game
                 @log.print('你感到寒冷，痛苦在身体中蔓延。')
                 @log.print("你受到负能量侵袭。遭受了#{num}点伤害")
 
+        if @pigfoot.get('hp') <= 0
+            @dead()
 
     attr_point: ->
         @add_node("attr_point", {value:1})
