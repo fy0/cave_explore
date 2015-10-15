@@ -306,7 +306,7 @@
 
     Game.prototype.heal = function() {
       var num;
-      num = rand(4);
+      num = rand(4 / 70 * this.pigfoot.get('hp_max'));
       this.add_node("heal", {
         hp: num
       });
@@ -323,7 +323,7 @@
 
     Game.prototype.harm = function() {
       var num;
-      num = rand(6);
+      num = rand(6 / 70 * this.pigfoot.get('hp_max'));
       this.add_node("harm", {
         hp: num
       });

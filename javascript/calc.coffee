@@ -177,7 +177,7 @@ class Game
         return
 
     heal: ->
-        num = rand(4)
+        num = rand(4/70*@pigfoot.get('hp_max'))
         @add_node("heal", {hp:num})
         @pigfoot.inc('hp', num)
         switch rand(2)
@@ -189,7 +189,7 @@ class Game
                 @log.print("大多数东西对你无用，除了一瓶治疗药剂。生命值回复#{num}")
 
     harm: ->
-        num = rand(6)
+        num = rand(6/70*@pigfoot.get('hp_max'))
         @add_node("harm", {hp:num})
         @pigfoot.inc('hp', -num)
         switch rand(3)
