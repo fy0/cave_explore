@@ -24,15 +24,23 @@
 
   Character = (function() {
     function Character() {
-      this.hp = 50;
-      this.hp_max = 50;
+      this.hp = 70;
+      this.hp_max = 70;
       this.mp = 5;
       this.mp_max = 5;
       this.atk = 5;
       this.spd = 7;
       this.attr_point = 0;
       this.lazy_point = 5;
+      this.lazy_point_max = 5;
+      this.effect = {};
     }
+
+    Character.prototype.refresh = function() {
+      this.hp = this.hp_max;
+      this.mp = this.mp_max;
+      return this.lazy_point = this.lazy_point_max;
+    };
 
     Character.prototype.inc = function(key, value) {
       if (this.hasOwnProperty(key)) {
@@ -52,15 +60,46 @@
       }
     };
 
+    Character.prototype.get = function(key) {
+      var extra;
+      if (this.hasOwnProperty(key)) {
+        if (this.effect.hasOwnProperty(key)) {
+          extra = this.effect[key];
+        } else {
+          extra = 0;
+        }
+        return this[key] + extra;
+      }
+    };
+
     return Character;
 
   })();
 
   Weather = (function() {
     Weather.values = {
-      1: ['阴'],
-      2: ['晴'],
-      3: ['雨']
+      1: {
+        txt: '阴',
+        effect: {},
+        desc: '今天是阴天。'
+      },
+      2: {
+        txt: '晴',
+        effect: {
+          lazy_point: 1,
+          atk: 1
+        },
+        desc: '今天是晴天，疲劳值+1，攻击力+1'
+      },
+      3: {
+        txt: '雨',
+        effect: {
+          spd: 1,
+          lazy_point: -1,
+          atk: -2
+        },
+        desc: '今天是雨天，速度+1，攻击-2，疲劳值-1'
+      }
     };
 
     function Weather() {
@@ -81,8 +120,8 @@
     function Camera() {
       this.minx = 0;
       this.miny = 0;
-      this.width = 800;
-      this.height = 300;
+      this.width = 960;
+      this.height = 240;
     }
 
     return Camera;
@@ -128,7 +167,7 @@
       };
       this.path.children.push({
         x: 20,
-        y: 150,
+        y: 120,
         type: "nothing",
         parent: this.path,
         children: []
@@ -136,6 +175,7 @@
       this.curpath = this.path.children[0];
       this.path_avail = [];
       this.refresh_arrow_transform();
+      this.weather_refresh();
     }
 
     Game.prototype.path_reset = function() {
@@ -205,16 +245,25 @@
       this.log.print('啊，一条岔路。生命中有无数选择，现在你的选择也多了一种。');
     };
 
-    Game.prototype.day_over = function(txt) {
-      return null;
-    };
-
     Game.prototype.switch_road = function() {
       if (this.curpath) {
         this.path_avail.push(this.curpath);
       }
       this.curpath = this.path_avail.shift();
       this.refresh_arrow_transform();
+      this.monster_info();
+    };
+
+    Game.prototype.monster_info = function() {
+      var i, mi;
+      if (this.curpath.type === 'monster') {
+        mi = this.curpath.minfo;
+        i = '怪物';
+        if (this.pigfoot.get('spd') > mi.spd) {
+          i = '角色';
+        }
+        this.log.print("（怪物属性：生命" + mi.hp + " 攻击" + mi.atk + " 速度" + mi.spd + "） => " + i + "先攻");
+      }
     };
 
     Game.prototype.add_node = function(type, data) {
@@ -350,20 +399,77 @@
         atk: atk,
         exp: exp
       };
-      this.log.print("（怪物属性：生命" + hp + " 攻击" + atk + " 速度" + spd + "）");
-      return this.add_node("monster", {
+      this.add_node("monster", {
         minfo: data
       });
+      return this.monster_info();
+    };
+
+    Game.prototype.tried = function() {
+      this.log.print('搏杀与行走使你疲惫不堪，你再也无法支撑下去，只得回去。只好等到明天了。');
+      return this.tomorrow();
+    };
+
+    Game.prototype.dead = function() {
+      this.log.print('你受到了重创，最终拼尽全力逃了回去。这一天结束了。属性点-1');
+      this.pigfoot.inc('attr_point', -1);
+      return this.tomorrow();
     };
 
     Game.prototype.step = function() {
-      var mi, value;
+      var atk1, atk2, mi, self, value;
       if (this.curpath.type === 'monster') {
-        this.log.print("你不曾迟疑，挥剑而上。");
+        switch (rand(3)) {
+          case 1:
+            this.log.print("你不曾迟疑，挥剑而上。");
+            break;
+          case 2:
+            this.log.print("你摆好架势，向怪物发起了攻击");
+            break;
+          case 3:
+            this.log.print("你迅速举起武器，横斩过去");
+        }
         mi = this.curpath.minfo;
-        this.log.print("（怪物属性：生命" + mi.hp + " 攻击" + mi.atk + " 速度" + mi.spd + "）");
+        self = this;
+        atk1 = function() {
+          mi.hp -= self.pigfoot.get('atk');
+          if (mi.hp <= 0) {
+            self.log.print("经过一番搏斗，你杀死了怪物。你感受到了深深的疲倦。");
+            self.log.print("疲劳值-1，属性点+" + mi.exp);
+            self.new_space();
+            self.pigfoot.inc('attr_point', mi.exp);
+            self.pigfoot.inc('lazy_point', -1);
+            if (self.pigfoot.get('lazy_point') <= 0) {
+              self.tried();
+            }
+            return 1;
+          }
+        };
+        atk2 = function() {
+          self.pigfoot.inc('hp', -mi.hp);
+          if (self.pigfoot.get('hp') <= 0) {
+            self.dead();
+            return 1;
+          }
+        };
+        if (this.pigfoot.get('spd') > mi.spd) {
+          if (atk1()) {
+            return;
+          }
+          if (atk2()) {
+            return;
+          }
+        } else {
+          if (atk2()) {
+            return;
+          }
+          if (atk1()) {
+            return;
+          }
+        }
+        this.monster_info();
       } else {
-        value = rand(20);
+        value = rand(18);
         switch (false) {
           case !((1 <= value && value <= 1)):
             this.dead_or_new_road();
@@ -389,7 +495,7 @@
           case !((14 <= value && value <= 14)):
             this.lazy_point_dec();
             break;
-          case !((15 <= value && value <= 20)):
+          case !((15 <= value && value <= 18)):
             this.monster();
         }
       }
@@ -398,7 +504,14 @@
     Game.prototype.tomorrow = function() {
       this.day += 1;
       this.weather.next();
-      return this.path_reset();
+      this.pigfoot.refresh();
+      this.path_reset();
+      return this.weather_refresh();
+    };
+
+    Game.prototype.weather_refresh = function() {
+      this.log.print(this.weather.today.desc);
+      this.pigfoot.effect = this.weather.today.effect;
     };
 
     return Game;
@@ -446,6 +559,30 @@
           x = last.x;
           y = last.y - 28;
           return "translate(" + x + ", " + y + ")";
+        },
+        atk_txt: function() {
+          var eatk;
+          eatk = game.pigfoot.effect.atk || 0;
+          if (eatk >= 0) {
+            eatk = '+' + eatk.toString();
+          }
+          return "" + game.pigfoot.atk + eatk;
+        },
+        spd_txt: function() {
+          var val;
+          val = game.pigfoot.effect.spd || 0;
+          if (val >= 0) {
+            val = '+' + val.toString();
+          }
+          return "" + game.pigfoot.spd + val;
+        },
+        lazy_point_txt: function() {
+          var val;
+          val = game.pigfoot.effect.lazy_point || 0;
+          if (val >= 0) {
+            val = '+' + val.toString();
+          }
+          return "" + game.pigfoot.lazy_point + val;
         }
       },
       methods: {
@@ -479,6 +616,37 @@
           game.log.print('带着满身的疲惫，你决定回家休息。');
           game.log.print('但是随着时间的流逝，黑暗的力量会使得怪物变得更强。');
           return game.tomorrow();
+        },
+        life_up: function() {
+          if (game.pigfoot.get('attr_point') >= 1) {
+            game.pigfoot.inc('attr_point', -1);
+            game.pigfoot.inc('hp_max', 10);
+            return game.pigfoot.inc('hp', 10);
+          }
+        },
+        spd_up: function() {
+          if (game.pigfoot.get('attr_point') >= 2) {
+            game.pigfoot.inc('attr_point', -2);
+            return game.pigfoot.inc('spd', 1);
+          }
+        },
+        atk_up: function() {
+          if (game.pigfoot.get('attr_point') >= 2) {
+            game.pigfoot.inc('attr_point', -2);
+            return game.pigfoot.inc('atk', 1);
+          }
+        },
+        lazy_up: function() {
+          if (game.pigfoot.get('attr_point') >= 1) {
+            game.pigfoot.inc('attr_point', -1);
+            return game.pigfoot.inc('lazy_point', 1);
+          }
+        },
+        recure: function() {
+          if (game.pigfoot.get('attr_point') >= 2) {
+            game.pigfoot.inc('attr_point', -2);
+            return game.pigfoot.inc('hp', Math.ceil(game.pigfoot.get('hp_max') * 0.5));
+          }
         }
       }
     });

@@ -94,13 +94,17 @@
             <h2 style="float:left;margin-bottom:0px;margin-right:10px;">简单的RPG</h2>
             <div>
                 <div>天数 {{ game.day }}</div>
-                <div>今日天气 {{ weather.today[0] }}</div>
+                <div>今日天气 {{ weather.today.txt }}</div>
             </div>
         </div>
         <div class="charinfo" style="clearfix: both;">
-            生命值: {{charinfo.hp}} 攻击力: {{charinfo.atk}} 速度: {{charinfo.spd}} 属性点: {{charinfo.attr_point}} 疲劳值: {{charinfo.lazy_point}}
+            生命值: {{charinfo.hp}}/{{charinfo.hp_max}}
+            攻击力: {{charinfo.get('atk')}}({{atk_txt}})
+            速度: {{charinfo.get('spd')}}({{spd_txt}})
+            属性点: {{charinfo.attr_point.toFixed(1)}}
+            疲劳值: {{charinfo.get('lazy_point')}}({{lazy_point_txt}})
         </div>
-        <svg id="stage" width="800" height="300" v-attr="viewBox: camera_box"
+        <svg id="stage" width="960" height="240" v-attr="viewBox: camera_box"
             v-on="selectstart:prevent, mousemove: dragMove, mouseup:dragEnd, mousedown:dragStart">
             <node class="node" model={{path}}></node>
             <g id="arrow" v-attr="transform: game.arrow_transform" fill="#fff" stroke="#000">
@@ -115,6 +119,14 @@
             <button class="button button-primary" v-on="click : step">前行</button>
             <button class="button button-primary" v-on="click : switch_road">换路</button>
             <button class="button button-primary" v-on="click : seeyou">回家</button>
+        </div>
+
+        <div>
+            <button class="button" v-on="click: life_up">强化：生命+10 (1)</button>
+            <button class="button" v-on="click: spd_up">强化：速度+1 (2)</button>
+            <button class="button" v-on="click: atk_up">强化：攻击+1 (2)</button>
+            <button class="button" v-on="click: lazy_up">强化：疲劳+1 (1)</button>
+            <button class="button" v-on="click: recure">回复一半生命值 (2)</button>
         </div>
     </div>
 </div>

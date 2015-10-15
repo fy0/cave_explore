@@ -18,14 +18,21 @@ randr = (a, b) ->
 
 class Character
     constructor: ->
-        @hp = 50
-        @hp_max = 50
+        @hp = 70
+        @hp_max = 70
         @mp = 5
         @mp_max = 5
         @atk = 5
         @spd = 7
         @attr_point = 0
         @lazy_point = 5
+        @lazy_point_max = 5
+        @effect = {}
+
+    refresh: ->
+        @hp = @hp_max
+        @mp = @mp_max
+        @lazy_point = @lazy_point_max
 
     inc: (key, value) ->
         if @hasOwnProperty(key)
@@ -40,12 +47,19 @@ class Character
             else
                 @[key] += value
 
+    get: (key) ->
+        if @hasOwnProperty(key)
+            if @effect.hasOwnProperty(key)
+                extra = @effect[key]
+            else
+                extra = 0
+            return @[key] + extra
 
 class Weather
     @values = {
-        1: ['阴'],
-        2: ['晴'],
-        3: ['雨'],
+        1: {txt:'阴', effect:{}, desc:'今天是阴天。'},
+        2: {txt:'晴', effect:{lazy_point:1, atk:1}, desc:'今天是晴天，疲劳值+1，攻击力+1'},
+        3: {txt:'雨', effect:{spd:1, lazy_point:-1, atk:-2}, desc:'今天是雨天，速度+1，攻击-2，疲劳值-1'},
     }
 
     constructor: ->
@@ -59,8 +73,8 @@ class Camera
     constructor: ->
         @minx = 0
         @miny = 0
-        @width = 800
-        @height = 300
+        @width = 960
+        @height = 240
 
 class Log
     constructor: ->
@@ -83,10 +97,11 @@ class Game
         @pigfoot = new Character()
         @focus = null
         @path = {children:[]}
-        @path.children.push({x:20, y:150, type:"nothing", parent: @path, children:[]})
+        @path.children.push({x:20, y:120, type:"nothing", parent: @path, children:[]})
         @curpath = @path.children[0]
         @path_avail = []
         @refresh_arrow_transform()
+        @weather_refresh()
 
     path_reset: ->
         @path.children = []
@@ -128,13 +143,19 @@ class Game
         @log.print('啊，一条岔路。生命中有无数选择，现在你的选择也多了一种。')
         return
 
-    day_over: (txt) ->
-        null
-
     switch_road: ->
         @path_avail.push(@curpath) if @curpath
         @curpath = @path_avail.shift()
         @refresh_arrow_transform()
+        @monster_info()
+        return
+
+    monster_info: ->
+        if @curpath.type == 'monster'
+            mi = @curpath.minfo
+            i = '怪物'
+            i = '角色' if @pigfoot.get('spd') > mi.spd
+            @log.print("（怪物属性：生命#{mi.hp} 攻击#{mi.atk} 速度#{mi.spd}） => #{i}先攻")
         return
 
     add_node: (type, data={}) ->
@@ -215,16 +236,58 @@ class Game
         atk = Math.ceil(3*(1+@day/5) + randr(2,6)*(1+@day/5))
         exp = parseFloat(((hp + spd + atk) / (1+@day/5) / (9 + 6 + 4) * 0.5).toFixed(1))
         data = {hp, spd, atk, exp}
-        @log.print("（怪物属性：生命#{hp} 攻击#{atk} 速度#{spd}）")
         @add_node("monster", {minfo: data})
+        @monster_info()
+
+    tried: ->
+        @log.print('搏杀与行走使你疲惫不堪，你再也无法支撑下去，只得回去。只好等到明天了。')
+        @tomorrow()
+
+    dead: ->
+        @log.print('你受到了重创，最终拼尽全力逃了回去。这一天结束了。属性点-1')
+        @pigfoot.inc('attr_point', -1)
+        @tomorrow()
 
     step: ->
         if @curpath.type == 'monster'
-            @log.print("你不曾迟疑，挥剑而上。")
+            switch rand(3)
+                when 1 then @log.print("你不曾迟疑，挥剑而上。")
+                when 2 then @log.print("你摆好架势，向怪物发起了攻击")
+                when 3 then @log.print("你迅速举起武器，横斩过去")
             mi = @curpath.minfo
-            @log.print("（怪物属性：生命#{mi.hp} 攻击#{mi.atk} 速度#{mi.spd}）")
+            self = @
+
+            atk1 = ->
+                mi.hp -= self.pigfoot.get('atk')
+                if mi.hp <= 0
+                    self.log.print("经过一番搏斗，你杀死了怪物。你感受到了深深的疲倦。")
+                    self.log.print("疲劳值-1，属性点+#{mi.exp}")
+                    self.new_space()
+
+                    self.pigfoot.inc('attr_point', mi.exp)
+                    self.pigfoot.inc('lazy_point', -1)
+                    if self.pigfoot.get('lazy_point') <= 0
+                        self.tried()
+                    return 1
+                return
+
+            atk2 = ->
+                self.pigfoot.inc('hp', -mi.hp)
+                if self.pigfoot.get('hp') <= 0
+                    self.dead()
+                    return 1
+                return
+
+            if @pigfoot.get('spd') > mi.spd
+                return if atk1()
+                return if atk2()
+            else
+                return if atk2()
+                return if atk1()
+
+            @monster_info()
         else
-            value = rand(20)
+            value = rand(18)
             switch
                 when 1<=value<=1 then @dead_or_new_road() # 死路/新路
                 when 2<=value<=2 then @new_road() # 新路
@@ -234,13 +297,21 @@ class Game
                 when 11<=value<=12 then @attr_point() # 属性点
                 when 13<=value<=13 then @lazy_point_inc() # 疲劳+1
                 when 14<=value<=14 then @lazy_point_dec() # 疲劳-1
-                when 15<=value<=20 then @monster() # 怪物
+                when 15<=value<=18 then @monster() # 怪物
         return
 
     tomorrow: ->
         @day += 1
         @weather.next()
+        @pigfoot.refresh()
         @path_reset()
+        @weather_refresh()
+
+    weather_refresh: ->
+        @log.print(@weather.today.desc)
+        @pigfoot.effect = @weather.today.effect
+        return
+
 
 
 root.init = ->
@@ -276,11 +347,28 @@ root.init = ->
             camera_box: ->
                 c = game.camera
                 return "#{c.minx} #{c.miny} #{c.width} #{c.height}"
+
             arrow_transform: ->
                 last = game.last()
                 x = last.x
                 y = last.y - 28
                 return "translate(#{x}, #{y})"
+
+            atk_txt: ->
+                eatk = game.pigfoot.effect.atk || 0
+                if eatk >= 0
+                    eatk = '+' + eatk.toString()
+                return "#{game.pigfoot.atk}#{eatk}"
+
+            spd_txt: ->
+                val = game.pigfoot.effect.spd || 0
+                val = '+' + val.toString() if val >= 0
+                return "#{game.pigfoot.spd}#{val}"
+
+            lazy_point_txt: ->
+                val = game.pigfoot.effect.lazy_point || 0
+                val = '+' + val.toString() if val >= 0
+                return "#{game.pigfoot.lazy_point}#{val}"
         },
         methods: {
             prevent: (e) ->
@@ -305,6 +393,32 @@ root.init = ->
                 game.log.print('带着满身的疲惫，你决定回家休息。')
                 game.log.print('但是随着时间的流逝，黑暗的力量会使得怪物变得更强。')
                 game.tomorrow()
+
+            life_up: ->
+                if game.pigfoot.get('attr_point') >= 1
+                    game.pigfoot.inc('attr_point', -1)
+                    game.pigfoot.inc('hp_max', 10)
+                    game.pigfoot.inc('hp', 10)
+
+            spd_up: ->
+                if game.pigfoot.get('attr_point') >= 2
+                    game.pigfoot.inc('attr_point', -2)
+                    game.pigfoot.inc('spd', 1)
+
+            atk_up: ->
+                if game.pigfoot.get('attr_point') >= 2
+                    game.pigfoot.inc('attr_point', -2)
+                    game.pigfoot.inc('atk', 1)
+
+            lazy_up: ->
+                if game.pigfoot.get('attr_point') >= 1
+                    game.pigfoot.inc('attr_point', -1)
+                    game.pigfoot.inc('lazy_point', 1)
+
+            recure: ->
+                if game.pigfoot.get('attr_point') >= 2
+                    game.pigfoot.inc('attr_point', -2)
+                    game.pigfoot.inc('hp', Math.ceil(game.pigfoot.get('hp_max') * 0.5))
         }
     })
 
