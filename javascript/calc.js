@@ -601,7 +601,7 @@
         },
         dragStart: function(e) {
           if (e.touches) {
-            this.drag = [e.touches.clientX, e.touches.clientY];
+            this.drag = [e.touches[0].clientX, e.touches[0].clientY];
           } else {
             this.drag = [e.x, e.y];
           }
@@ -612,8 +612,8 @@
           var ox, oy;
           if (this.drag) {
             if (e.touches) {
-              ox = e.touches.clientX - this.drag[0];
-              oy = e.touches.clientY - this.drag[1];
+              ox = e.touches[0].clientX - this.drag[0];
+              oy = e.touches[0].clientY - this.drag[1];
             } else {
               ox = e.x - this.drag[0];
               oy = e.y - this.drag[1];

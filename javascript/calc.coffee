@@ -380,7 +380,7 @@ root.init = ->
                 e.preventDefault()
             dragStart: (e) ->
                 if e.touches
-                    @drag = [e.touches.clientX, e.touches.clientY]
+                    @drag = [e.touches[0].clientX, e.touches[0].clientY]
                 else
                     @drag = [e.x, e.y]
                 @startx = game.camera.minx
@@ -388,8 +388,8 @@ root.init = ->
             dragMove: (e) ->
                 if @drag
                     if e.touches
-                        ox = e.touches.clientX - @drag[0]
-                        oy = e.touches.clientY - @drag[1]
+                        ox = e.touches[0].clientX - @drag[0]
+                        oy = e.touches[0].clientY - @drag[1]
                     else
                         ox = e.x - @drag[0]
                         oy = e.y - @drag[1]
