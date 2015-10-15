@@ -230,11 +230,14 @@ class Game
             when 2 then @log.print('石块密布，杂草丛生。你花了好大力气才清理出一条道路。疲劳值消耗1点')
             when 3 then @log.print('一块石头挡住了你的去路，你决定将他推开。疲劳值消耗1点')
 
+        if @pigfoot.get('lazy_point') <= 0
+            @tried()
+
     monster: ->
         @log.print('你小心翼翼地向前走着，黑暗如影随形。忽然，你感受到了死一般的寂静。停下脚步，黑暗中出现了一双血红的眸子。')
         @log.print('（前行则攻击，也可以换路来避开，击杀会消耗疲劳值1点）')
         hp = Math.ceil(5*(1+@day/5) + rand(8)*(1+@day/5))
-        spd = Math.ceil(4*(1+@day/5) + rand(4)*(1+@day/5))
+        spd = Math.ceil(4*(1+@day/5) + rand(4*(1+@day/5)))
         atk = Math.ceil(3*(1+@day/5) + randr(2,6)*(1+@day/5))
         exp = parseFloat(((hp + spd + atk) / (1+@day/5) / (9 + 6 + 4) * 0.5).toFixed(1))
         data = {hp, spd, atk, exp}
@@ -423,5 +426,3 @@ root.init = ->
                     game.pigfoot.inc('hp', Math.ceil(game.pigfoot.get('hp_max') * 0.5))
         }
     })
-
-    root.game = game

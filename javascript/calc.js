@@ -382,11 +382,16 @@
       this.pigfoot.inc('lazy_point', -1);
       switch (rand(3)) {
         case 1:
-          return this.log.print('路途艰难，你耗费了大量体力，疲劳值消耗1点');
+          this.log.print('路途艰难，你耗费了大量体力，疲劳值消耗1点');
+          break;
         case 2:
-          return this.log.print('石块密布，杂草丛生。你花了好大力气才清理出一条道路。疲劳值消耗1点');
+          this.log.print('石块密布，杂草丛生。你花了好大力气才清理出一条道路。疲劳值消耗1点');
+          break;
         case 3:
-          return this.log.print('一块石头挡住了你的去路，你决定将他推开。疲劳值消耗1点');
+          this.log.print('一块石头挡住了你的去路，你决定将他推开。疲劳值消耗1点');
+      }
+      if (this.pigfoot.get('lazy_point') <= 0) {
+        return this.tried();
       }
     };
 
@@ -395,7 +400,7 @@
       this.log.print('你小心翼翼地向前走着，黑暗如影随形。忽然，你感受到了死一般的寂静。停下脚步，黑暗中出现了一双血红的眸子。');
       this.log.print('（前行则攻击，也可以换路来避开，击杀会消耗疲劳值1点）');
       hp = Math.ceil(5 * (1 + this.day / 5) + rand(8) * (1 + this.day / 5));
-      spd = Math.ceil(4 * (1 + this.day / 5) + rand(4) * (1 + this.day / 5));
+      spd = Math.ceil(4 * (1 + this.day / 5) + rand(4 * (1 + this.day / 5)));
       atk = Math.ceil(3 * (1 + this.day / 5) + randr(2, 6) * (1 + this.day / 5));
       exp = parseFloat(((hp + spd + atk) / (1 + this.day / 5) / (9 + 6 + 4) * 0.5).toFixed(1));
       data = {
@@ -543,7 +548,7 @@
       }
     });
     Vue.component('node', MyComponent);
-    ui = new Vue({
+    return ui = new Vue({
       el: '#rpg',
       data: {
         game: game,
@@ -655,7 +660,6 @@
         }
       }
     });
-    return root.game = game;
   };
 
 }).call(this);
